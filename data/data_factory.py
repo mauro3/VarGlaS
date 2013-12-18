@@ -408,7 +408,6 @@ class DataFactory(object):
     lat   = array(data.variables['lat'][:][0])
     lon   = array(data.variables['lon'][:][0])
     U_sar = array(data.variables['surfvelmag'][:][0])
-    dhdt  = array(data.variables['dhdt'][:][0])
  
     direc = home + "/greenland/searise/smooth_target.mat" 
     U_ob  = loadmat(direc)['st']
@@ -431,8 +430,8 @@ class DataFactory(object):
     lon_0  = '-39'
  
     names = ['H', 'h', 'adot', 'b', 'T', 'q_geo','U_sar', \
-             'U_ob', 'lat', 'lon', 'Tn','dhdt']
-    ftns  = [H, h, adot, b, T, q_geo,U_sar, U_ob, lat, lon, Tn,dhdt]
+             'U_ob', 'lat', 'lon', 'Tn']
+    ftns  = [H, h, adot, b, T, q_geo,U_sar, U_ob, lat, lon, Tn]
 
     for n, f in zip(names, ftns):
       vara[n] = {'map_data'          : f,
@@ -501,3 +500,44 @@ class DataFactory(object):
 
 
 
+  @staticmethod
+  def get_study_region_DEM():
+
+    filename = inspect.getframeinfo(inspect.currentframe()).filename
+    home     = os.path.dirname(os.path.abspath(filename))
+    
+    direc    = home + '/antarctica/study_region/elevation/' 
+    files    = ['ASTGTM2_S78E161_dem']
+    vara     = dict()
+     
+    # extents of domain :
+    dx    =  17.994319205518387
+    west  =  423863.13
+    east  =  442739.172
+    north = -1285920.863
+    south = -1304473.006
+
+    #projection info :
+    proj   = 'stere'
+    lat_0  = '-90'
+    lat_ts = '-71'
+    lon_0  = '0'
+    
+    names = ['b']
+   
+
+    sys.path.append(home + '/external_import_scripts')
+    from tifffile import TiffFile
+    # retrieve data :
+    for n, f in zip(names, files):
+      data    = TiffFile(direc + f + '.tif')
+      vara[n] = {'map_data'          : data.asarray(),
+                 'map_western_edge'  : west,
+                 'map_eastern_edge'  : east,  
+                 'map_southern_edge' : south,
+                 'map_northern_edge' : north,
+                 'projection'        : proj,
+                 'standard lat'      : lat_0,
+                 'standard lon'      : lon_0,
+                 'lat true scale'    : lat_ts}
+    return vara 

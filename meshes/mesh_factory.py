@@ -4,7 +4,22 @@ import sys
 from dolfin import Mesh
 
 class MeshFactory(object):
- 
+    
+  @staticmethod
+  def get_study_region():
+    filename = inspect.getframeinfo(inspect.currentframe()).filename
+    home     = os.path.dirname(os.path.abspath(filename))
+    mesh     = home + '/antarctica/study_region.xml'
+    return Mesh(mesh)
+
+  @staticmethod
+  def get_study_region_test():
+    filename = inspect.getframeinfo(inspect.currentframe()).filename
+    home     = os.path.dirname(os.path.abspath(filename))                     
+    mesh     = home + '/antarctica/study_region_test.xml'
+    return Mesh(mesh)     
+
+
   @staticmethod
   def get_greenland_detailed():
     filename = inspect.getframeinfo(inspect.currentframe()).filename
@@ -29,19 +44,11 @@ class MeshFactory(object):
 
 
   @staticmethod
-  def get_antarctica_coarse():
+  def get_antarctica():
     filename = inspect.getframeinfo(inspect.currentframe()).filename
     home     = os.path.dirname(os.path.abspath(filename))
     mesh     = home + '/antarctica/antarctica_50H_5l.xml' 
     return Mesh(mesh)
-
-  @staticmethod
-  def get_antarctica_detailed():
-    filename = inspect.getframeinfo(inspect.currentframe()).filename
-    home     = os.path.dirname(os.path.abspath(filename))
-    mesh     = home + '/antarctica/antarctica_detailed_mesh.xml' 
-    return Mesh(mesh)
-
 
 
   @staticmethod
