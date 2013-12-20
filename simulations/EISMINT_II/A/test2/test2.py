@@ -1,3 +1,4 @@
+
 import sys
 src_directory = '../../../../'
 sys.path.append(src_directory)
@@ -52,7 +53,7 @@ nonlin_solver_params['newton_solver']['relaxation_parameter'] 	= 1.0
 nonlin_solver_params['newton_solver']['absolute_tolerance'] 	= 1.0
 nonlin_solver_params['linear_solver'] 				            = 'gmres'
 nonlin_solver_params['preconditioner'] 				            = 'hypre_amg'
-dolfin.parameters['form_compiler']['quadrature_degree']     = 2         #<--
+dolfin.parameters['form_compiler']['quadrature_degree']         = 2         #<--
 
 config = { 'mode' : 'steady',
            'coupled' : 
@@ -61,8 +62,8 @@ config = { 'mode' : 'steady',
                  'max_iter' : 1
                },
            't_start' : 0.0,
-           't_end' : 2.0,
-           'time_step' : .25,
+           't_end' : 5,
+           'time_step' : .1,
            'velocity' : 
                { 'on' : True,
                  'newton_params' : nonlin_solver_params,
@@ -127,11 +128,18 @@ model.set_mesh(mesh, flat_mesh=flat_mesh, deform=True)
 model.set_parameters(src.physical_constants.IceParameters())
 model.initialize_variables()
 
+import time
+t0 = time.time()
+
 F = src.solvers.SteadySolver(model,config)
 F.solve()
 
 T = src.solvers.TransientSolver(model,config)
 T.solve()
+
+t1 = time.time()
+
+print "Total Time for simulation", t1-t0
 
 dolfin.File('./results/u.xml') << model.u
 dolfin.File('./results/v.xml') << model.v
