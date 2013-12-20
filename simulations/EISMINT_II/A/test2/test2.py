@@ -1,4 +1,16 @@
-
+"""
+time step                   |.1  |
+________________________________________________________________________________
+time per year               |2.83|
+time per 50000 yrs (hrs)    |39  |
+5 km mesh   
+1680 elements
+________________________________________________________________________________
+time per year               |2.53|
+time per 50000 yrs (hrs)    |39  |
+9  km mesh   
+1208 elements
+"""
 import sys
 src_directory = '../../../../'
 sys.path.append(src_directory)
@@ -13,6 +25,8 @@ from src.utilities       import DataInput
 from data.data_factory   import DataFactory
 dolfin.set_log_active(True)
 
+mesh_resolution = 9
+
 L = 750000.0
 S_0 = 10.0
 S_b = 1e-5
@@ -22,8 +36,8 @@ M_max = 0.5
 T_min = 238.15
 S_T = 1.67e-5
 
-mesh          = MeshFactory.get_study_region()
-flat_mesh     = MeshFactory.get_study_region()
+mesh          = MeshFactory.get_study_region(mesh_resolution)
+flat_mesh     = MeshFactory.get_study_region(mesh_resolution)
 
 study_region  = DataFactory.get_study_region_DEM()
 sr            = DataInput(None, study_region,  mesh=mesh)
@@ -62,7 +76,7 @@ config = { 'mode' : 'steady',
                  'max_iter' : 1
                },
            't_start' : 0.0,
-           't_end' : 5,
+           't_end' : 50000,
            'time_step' : .1,
            'velocity' : 
                { 'on' : True,
@@ -128,8 +142,8 @@ model.set_mesh(mesh, flat_mesh=flat_mesh, deform=True)
 model.set_parameters(src.physical_constants.IceParameters())
 model.initialize_variables()
 
-import time
-t0 = time.time()
+#import time
+#t0 = time.time()
 
 F = src.solvers.SteadySolver(model,config)
 F.solve()
@@ -137,9 +151,9 @@ F.solve()
 T = src.solvers.TransientSolver(model,config)
 T.solve()
 
-t1 = time.time()
+#t1 = time.time()
 
-print "Total Time for simulation", t1-t0
+#print "Total Time for simulation: ", t1-t0
 
 dolfin.File('./results/u.xml') << model.u
 dolfin.File('./results/v.xml') << model.v
