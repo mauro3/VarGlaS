@@ -76,7 +76,7 @@ config = { 'mode' : 'steady',
                  'max_iter' : 1
                },
            't_start' : 0.0,
-           't_end' : 50000,
+           't_end' : 5,
            'time_step' : .1,
            'velocity' : 
                { 'on' : True,
@@ -129,10 +129,11 @@ config = { 'mode' : 'steady',
                  'objective_function' : 'logarithmic',
                  'animate' : False
                },
-            'output_path' : '../t1/',
+            'output_path' : '../t2/',
             'wall_markers' : [],
             'periodic_boundary_conditions' : False,
-            'log': True }
+            'log': True, 
+            'output_evry_year_only': True}
 
 model = src.model.Model()
 model.set_geometry(Surface(), Bed)

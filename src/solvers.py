@@ -295,13 +295,26 @@ class TransientSolver(object):
 
       # Store velocity, temperature, and age to vtk files
       if self.config['log']:
-        U = project(as_vector([u, v, w]))
-        self.file_u << (U, t)
-        self.file_T << (T, t)
-        self.file_S << (S, t)
-        self.t_log.append(t)
-        M = assemble(self.surface_instance.M)
-        self.mass.append(M)
+        if self.config['output_evry_year_only']:
+          print "=============================== t =",t
+          if t%1 == 0:
+            print "=============================== IN"
+            U = project(as_vector([u, v, w]))
+            self.file_u << (U, t)
+            self.file_T << (T, t)
+            self.file_S << (S, t)
+            self.t_log.append(t)
+            M = assemble(self.surface_instance.M)
+            self.mass.append(M)
+
+        else:
+          U = project(as_vector([u, v, w]))
+          self.file_u << (U, t)
+          self.file_T << (T, t)
+          self.file_S << (S, t)
+          self.t_log.append(t)
+          M = assemble(self.surface_instance.M)
+          self.mass.append(M)
 
       # Increment time step
       if MPI.process_number()==0:
