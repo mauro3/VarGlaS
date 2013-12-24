@@ -1,15 +1,14 @@
 import inspect
 import os
-import sys
 from dolfin import Mesh
 
 class MeshFactory(object):
     
   @staticmethod
-  def get_study_region():
+  def get_study_region(km):
     filename = inspect.getframeinfo(inspect.currentframe()).filename
     home     = os.path.dirname(os.path.abspath(filename))
-    mesh     = home + '/antarctica/study_region.xml'
+    mesh     = home + '/antarctica/study_region_{0}.xml'.format(km)
     return Mesh(mesh)
 
   @staticmethod
