@@ -297,9 +297,8 @@ class TransientSolver(object):
       # Store velocity, temperature, and age to vtk files
       if self.config['log']:
         try:
-          years = self.config['output_evry_year_only']
+          years = self.config['log_interval']
           if round(t,1)%years == 0:
-            print "====================",t
             U = project(as_vector([u, v, w]))
             self.file_u << (U, t)
             self.file_T << (T, t)

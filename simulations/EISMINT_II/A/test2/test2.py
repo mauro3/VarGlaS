@@ -129,11 +129,11 @@ config = { 'mode' : 'steady',
                  'objective_function' : 'logarithmic',
                  'animate' : False
                },
-            'output_path' : '../t2/',
+            'output_path' : '../t1/',
             'wall_markers' : [],
             'periodic_boundary_conditions' : False,
             'log': True, 
-            'output_evry_year_only': 5}
+            'log_interval': 10}
 
 model = src.model.Model()
 model.set_geometry(Surface(), Bed)
