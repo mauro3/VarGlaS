@@ -69,7 +69,7 @@ config = { 'mode' : 'steady',
                  'max_iter' : 1
                },
            't_start' : 0.0,
-           't_end' : 100,
+           't_end' : 50000,
            'time_step' : .1,
            'velocity' : 
                { 'on' : True,
@@ -126,7 +126,7 @@ config = { 'mode' : 'steady',
             'wall_markers' : [],
             'periodic_boundary_conditions' : False,
             'log': True, 
-            'log_interval': 10}
+            'log_interval': 100}
 
 model = src.model.Model()
 model.set_geometry(Surface(), Bed)
