@@ -1,16 +1,3 @@
-"""
-time step                   |.1  |
-________________________________________________________________________________
-time per year               |2.83|
-time per 50000 yrs (hrs)    |39  |
-5 km mesh   
-1680 elements
-________________________________________________________________________________
-time per year               |2.53|
-time per 50000 yrs (hrs)    |39  |
-9  km mesh   
-1208 elements
-"""
 import sys
 src_directory = '../../../../'
 sys.path.append(src_directory)
@@ -25,7 +12,7 @@ from src.utilities       import DataInput
 from data.data_factory   import DataFactory
 dolfin.set_log_active(True)
 
-mesh_resolution = 5
+mesh_resolution = 9
 
 L = 750000.0
 S_0 = 10.0
@@ -44,38 +31,35 @@ study_region  = DataFactory.get_study_region_DEM()
 sr            = DataInput(None, study_region,  mesh=mesh)
 b2            = DataInput(None, bedmap2, mesh=mesh)
 
-# set minimum values
-b2.set_data_min("adot",0,0)
-
 Bed           = sr.get_spline_expression("b")
-adot          = b2.get_spline_expression("adot")
-srfTemp      = b2.get_spline_expression("srfTemp")
+srfTemp       = b2.get_spline_expression("srfTemp")
+smb           = b2.get_spline_expression("adot")
+
+#class BedEx(dolfin.Expression):
+#    def eval(self,values,x):
+#        values[0] = 0.0
+#Bed = BedEx()
 
 class Surface(dolfin.Expression):
     def eval(self,values,x):
         xn, yn = x[0], x[1]
         values[0] = Bed(xn, yn) + 1.0
 
-class ST(dolfin.Expression):
+class MassBalance(dolfin.Expression):
     def eval(self,values,x):
         xn, yn = x[0], x[1]
-        values[0] = srfTemp(xn, yn) - 10
-
-#class MassBalance(dolfin.Expression):
-    #def eval(self,values,x):
-        #values[0] = .02 # min(M_max,S_b*(R_el-pylab.sqrt(x[0]**2 + x[1]**2))) 
+        values[0] = smb(xn, yn)
 
 class SurfaceTemperature(dolfin.Expression):
     def eval(self,values,x):
-        values[0] =  T_min + S_T*pylab.sqrt(x[0]**2 + x[1]**2)
+        xn, yn = x[0], x[1]
+        values[0] = 273 + srfTemp(xn,yn)
 
 nonlin_solver_params = src.helper.default_nonlin_solver_params()
-nonlin_solver_params['newton_solver']['relaxation_parameter']    = 0.7
-nonlin_solver_params['newton_solver']['relative_tolerance']      = 1e-3
-nonlin_solver_params['newton_solver']['maximum_iterations']      = 20
-nonlin_solver_params['newton_solver']['error_on_nonconvergence'] = False
-nonlin_solver_params['linear_solver'] 				            = 'gmres'
-nonlin_solver_params['preconditioner'] 				            = 'hypre_amg'
+nonlin_solver_params['newton_solver']['relaxation_parameter'] 	= 1.0
+nonlin_solver_params['newton_solver']['absolute_tolerance'] 	  = 1.0
+nonlin_solver_params['linear_solver'] 				                  = 'gmres'
+nonlin_solver_params['preconditioner'] 				                  = 'hypre_amg'
 dolfin.parameters['form_compiler']['quadrature_degree']         = 2         #<--
 
 config = { 'mode' : 'steady',
@@ -85,7 +69,7 @@ config = { 'mode' : 'steady',
                  'max_iter' : 1
                },
            't_start' : 0.0,
-           't_end' : 1,
+           't_end' : 100,
            'time_step' : .1,
            'velocity' : 
                { 'on' : True,
@@ -104,7 +88,7 @@ config = { 'mode' : 'steady',
            'enthalpy' : 
                { 'on': True,
                  'use_surface_climate': False,
-                 'T_surface' : adot,
+                 'T_surface' : SurfaceTemperature(),
                  'q_geo' : 0.042*60**2*24*365,
                  'lateral_boundaries':None
                  
@@ -115,7 +99,7 @@ config = { 'mode' : 'steady',
                  'use_shock_capturing':True,
                  'thklim': 5.0,
                  'use_pdd': False,
-                 'observed_smb': srfTemp,
+                 'observed_smb': MassBalance(),
                  'static_boundary_conditions':False
                },  
            'age' : 
@@ -138,12 +122,11 @@ config = { 'mode' : 'steady',
                  'objective_function' : 'logarithmic',
                  'animate' : False
                },
-            'output_path' : './t1/',
+            'output_path' : '../t1/',
             'wall_markers' : [],
             'periodic_boundary_conditions' : False,
-            'log': True}
-
-            #'log_interval': 10}
+            'log': True, 
+            'log_interval': 10}
 
 model = src.model.Model()
 model.set_geometry(Surface(), Bed)
@@ -166,8 +149,8 @@ T.solve()
 
 #print "Total Time for simulation: ", t1-t0
 
-dolfin.File('./t1/results/T_surface.pvd') << model.T_surface
-dolfin.File('./t1/results/SMB.pvd') << model.smb
+dolfin.File('./results/u.xml') << model.u
+dolfin.File('./results/v.xml') << model.v
 dolfin.File('./results/w.xml') << model.w
 dolfin.File('./results/S.xml') << model.S
 dolfin.File('./results/T.xml') << model.T
